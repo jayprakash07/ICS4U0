@@ -1,0 +1,259 @@
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+
+/**
+ * 
+ */
+
+/**
+ * @author simranbaria
+ * Date: Jun. 2022
+ * Desc: Customer UI Window for Bank GUI
+ *
+ */
+public class CustomerUI extends JFrame implements ActionListener {
+
+	/**
+	 * Private data
+	 */
+	private JLabel nameLabel, addressLabel, phoneLabel, typeLabel, numberLabel, balanceLabel;
+	private JTable outputTable;
+	private JPanel outputPanel, buttonPanel;
+	private JButton depositButton, withdrawButton, saveButton, backButton, quitButton;
+	private Customer customer;
+	private ChequingAccount chequing;
+	private SavingsAccount savings;
+	private InvestmentAccount investment;
+
+	/**
+	 * 
+	 */
+	public CustomerUI(Customer customer, ChequingAccount chequing, SavingsAccount savings, InvestmentAccount investment) {
+		// Create frame
+		super("Bank Account");
+		setSize(500, 290);
+		setLayout(null);
+
+		// Initialize information
+		this.customer = customer;
+		this.chequing = chequing;
+		this.savings = savings;
+		this.investment = investment;
+
+		// Create customer info labels
+		nameLabel = new JLabel("Name: " + this.customer.getName());
+		nameLabel.setBounds(25, 25, 450, 20);
+		add(nameLabel);
+		addressLabel = new JLabel("Address: " + this.customer.getAddress());
+		addressLabel.setBounds(25, 45, 450, 20);
+		add(addressLabel);
+		phoneLabel = new JLabel("Phone Number: " + this.customer.getPhone());
+		phoneLabel.setBounds(25, 65, 450, 20);
+		add(phoneLabel);
+
+		// Create output labels
+		typeLabel = new JLabel("Account Type");
+		typeLabel.setBounds(25, 100, 150, 20);
+		add(typeLabel);
+		numberLabel = new JLabel("Account Number");
+		numberLabel.setBounds(175, 100, 150, 20);
+		add(numberLabel);
+		balanceLabel = new JLabel("Account Balance");
+		balanceLabel.setBounds(325, 100, 150, 20);
+		add(balanceLabel);
+
+		// Create output area
+		outputPanel = new JPanel();
+		outputPanel.setBounds(25, 120, 450, 65);
+		outputTable = new JTable(3, 3);
+
+		outputTable.setValueAt("Chequing", 0, 0);
+		outputTable.setValueAt("Savings", 1, 0);
+		outputTable.setValueAt("Investment", 2, 0);
+		outputTable.setValueAt(this.chequing.getAccountNumber(), 0, 1);
+		outputTable.setValueAt(this.savings.getAccountNumber(), 1, 1);
+		outputTable.setValueAt(this.investment.getAccountNumber(), 2, 1);
+		outputTable.setValueAt(this.chequing.formatBalance(this.chequing.getBalance()), 0, 2);
+		outputTable.setValueAt(this.savings.formatBalance(this.savings.getBalance()), 1, 2);
+		outputTable.setValueAt(this.investment.formatBalance(this.investment.getBalance()), 2, 2);
+
+		outputTable.setRowHeight(20);
+		for(int i = 0; i < 3; i++) {
+			outputTable.getColumnModel().getColumn(i).setPreferredWidth(150);
+		}
+		outputTable.setDefaultEditor(Object.class, null);
+		outputPanel.add(outputTable);
+		add(outputPanel);
+
+		// Create buttons
+		buttonPanel = new JPanel();
+		buttonPanel.setBounds(25, 190, 450, 95);
+
+		depositButton = new JButton("Deposit");
+		depositButton.addActionListener(this);
+		buttonPanel.add(depositButton);
+
+		withdrawButton = new JButton("Withdraw");
+		withdrawButton.addActionListener(this);
+		buttonPanel.add(withdrawButton);
+
+		saveButton = new JButton("Save");
+		saveButton.addActionListener(this);
+		buttonPanel.add(saveButton);
+
+		backButton = new JButton("Back");
+		backButton.addActionListener(this);
+		buttonPanel.add(backButton);
+
+		quitButton = new JButton("Quit");
+		quitButton.addActionListener(this);
+		buttonPanel.add(quitButton);
+
+		add(buttonPanel);
+	}
+
+	/**
+	 * Method to listen to buttons
+	 */
+	public void actionPerformed(ActionEvent event) {
+		switch(event.getActionCommand()) {
+		case "Deposit": {
+			// Get selected account
+			int row = outputTable.getSelectedRow();
+
+			if(row < 0) JOptionPane.showMessageDialog(null, "Please select an account");
+			else {
+				double funds = Double.parseDouble(JOptionPane.showInputDialog(null, "Enter funds to deposit"));
+				switch(row) {
+				// Chequing
+				case 0: {
+					if(chequing.deposit(funds)) {
+						outputTable.setValueAt(chequing.formatBalance(chequing.getBalance()), 0, 2);
+						JOptionPane.showMessageDialog(null, "$" + chequing.formatBalance(funds) + " deposited into Chequing Account");
+					}
+					else JOptionPane.showMessageDialog(null, "Cannot deposit negative funds");
+					break;
+				}
+				// Savings
+				case 1: {
+					if(savings.deposit(funds)) {
+						outputTable.setValueAt(savings.formatBalance(savings.getBalance()), 1, 2);
+						JOptionPane.showMessageDialog(null, "$" + savings.formatBalance(funds) + " deposited into Savings Account");
+					}
+					else JOptionPane.showMessageDialog(null, "Cannot deposit negative funds");
+					break;
+				}
+				// Investment
+				case 2: {
+					if(investment.deposit(funds)) {
+						outputTable.setValueAt(investment.formatBalance(investment.getBalance()), 2, 2);
+						JOptionPane.showMessageDialog(null, "$" + investment.formatBalance(funds) + " deposited into Investment Account");
+					}
+					else JOptionPane.showMessageDialog(null, "Cannot deposit funds less than " + investment.formatBalance(investment.getMinimumInvestment()));
+					break;
+				}
+				}
+			}
+			
+			break;
+		}
+		case "Withdraw": {
+			// Get selected account
+			int row = outputTable.getSelectedRow();
+
+			if(row < 0) JOptionPane.showMessageDialog(null, "Please select an account");
+			else {
+				double funds = Double.parseDouble(JOptionPane.showInputDialog(null, "Enter funds to withdraw"));
+				switch(row) {
+				// Chequing
+				case 0: {
+					if(chequing.withdraw(funds)) {
+						outputTable.setValueAt(chequing.formatBalance(chequing.getBalance()), 0, 2);
+						JOptionPane.showMessageDialog(null, "$" + chequing.formatBalance(funds) + " withdrawn from Chequing Account");
+					}
+					else JOptionPane.showMessageDialog(null, "Insufficient funds");
+					break;
+				}
+				// Savings
+				case 1: {
+					if(savings.withdraw(funds)) {
+						outputTable.setValueAt(savings.formatBalance(savings.getBalance()), 1, 2);
+						JOptionPane.showMessageDialog(null, "$" + savings.formatBalance(funds) + " withdrawn from Savings Account");
+					}
+					else JOptionPane.showMessageDialog(null, "Insufficient funds");
+					break;
+				}
+				// Investment
+				case 2: {
+					int days = Integer.parseInt(JOptionPane.showInputDialog(null, "Enter days since your last withdrawal"));
+					if(investment.withdraw(funds, days)) {
+						outputTable.setValueAt(investment.formatBalance(investment.getBalance()), 2, 2);
+						JOptionPane.showMessageDialog(null, "$" + investment.formatBalance(funds) + " withdrawn from Investment Account");
+					}
+					else JOptionPane.showMessageDialog(null, "Insufficient funds");
+					break;
+				}
+				}
+			}
+			
+			break;
+		}
+		case "Save": {
+			try {
+				// Open file
+				String fileName = customer.getName() + "-" + chequing.getAccountNumber() + "-" + savings.getAccountNumber() + "-" + investment.getAccountNumber();
+				PrintWriter outputFile = new PrintWriter(new FileWriter(fileName));
+				
+				// Print information
+				outputFile.println(customer.getAddress());
+				outputFile.println(customer.getPhone());
+				outputFile.println(chequing.getBalance());
+				outputFile.println(savings.getBalance());
+				outputFile.print(investment.getBalance());
+				
+				// Close file
+				outputFile.close();
+				JOptionPane.showMessageDialog(null, "Saved");
+			}
+			catch(IOException error) {
+				JOptionPane.showMessageDialog(null, "Error saving file");
+			}
+			
+			break;
+		}
+		case "Back": {
+			int confirm = JOptionPane.showConfirmDialog(null, "Save before exiting?");
+			if(confirm == 0) saveButton.doClick();
+			
+			setVisible(false);
+			Main.back();
+			
+			break;
+		}
+		case "Quit": {
+			int confirm = JOptionPane.showConfirmDialog(null, "Save before exiting?");
+			if(confirm == 0) saveButton.doClick();
+			
+			System.exit(0);
+			break;
+		}
+		}
+	}
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+
+	}
+
+}

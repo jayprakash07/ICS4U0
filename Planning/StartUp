@@ -1,0 +1,74 @@
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+
+/**
+ * 
+ */
+
+/**
+ * @author simranbaria
+ * Date: Jun. 2022
+ * Desc: Start Up window for Bank GUI
+ *
+ */
+public class StartUp extends JFrame implements ActionListener {
+	
+	/**
+	 * Private data
+	 */
+	private JButton customerLoginButton, customerSignUpButton, employeeLoginButton, quitButton;
+
+	/**
+	 * 
+	 */
+	public StartUp() {
+		// Create frame
+		super("Welcome");
+		setSize(250, 350);
+		setLayout(null);
+		
+		// Create buttons
+		customerLoginButton = new JButton("Customer Login");
+		customerLoginButton.addActionListener(this);
+		customerLoginButton.setBounds(50, 25, 150, 50);
+		add(customerLoginButton);
+		
+		customerSignUpButton = new JButton("Customer Sign Up");
+		customerSignUpButton.addActionListener(this);
+		customerSignUpButton.setBounds(50, 100, 150, 50);
+		add(customerSignUpButton);
+
+		employeeLoginButton = new JButton("Employee Login");
+		employeeLoginButton.addActionListener(this);
+		employeeLoginButton.setBounds(50, 175, 150, 50);
+		add(employeeLoginButton);
+		
+		quitButton = new JButton("Quit");
+		quitButton.addActionListener(this);
+		quitButton.setBounds(50, 250, 150, 50);
+		add(quitButton);
+	}
+	
+	/**
+	 * Method to listen to buttons
+	 */
+	public void actionPerformed(ActionEvent event) {
+		setVisible(false);
+		
+		// Quit
+		if(event.getSource() == quitButton) System.exit(0);
+		
+		// Proceed to other window
+		else Main.startUpEvent(event.getActionCommand());
+	}
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+
+	}
+
+}

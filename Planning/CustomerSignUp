@@ -1,0 +1,220 @@
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+
+/**
+ * 
+ */
+
+/**
+ * @author simranbaria
+ * Date: Jun. 2022
+ * Desc: Customer Sign Up Window for Bank GUI
+ *
+ */
+public class CustomerSignUp extends JFrame implements ActionListener {
+
+	/**
+	 * Private data
+	 */
+	private JLabel idLabel, passwordLabel, nameLabel, addressLabel, phoneLabel, chequingLabel, savingsLabel, investemntLabel;
+	private JTextField idInput, nameInput, addressInput, phoneInput, chequingInput, savingsInput, investmentInput;
+	private JPasswordField passwordInput;
+	private JPanel buttonPanel;
+	private JButton backButton, confirmButton;
+
+	/**
+	 * 
+	 */
+	public CustomerSignUp() {
+		// Create frame
+		super("Sign Up");
+		setSize(300, 500);
+		setLayout(null);
+
+		// Create id input
+		idLabel = new JLabel("ID:");
+		idLabel.setBounds(50, 20, 200, 20);
+		add(idLabel);
+		idInput = new JTextField();
+		idInput.setBounds(50, 40, 200, 20);
+		add(idInput);
+
+		// Create password input
+		passwordLabel = new JLabel("Password:");
+		passwordLabel.setBounds(50, 70, 200, 20);
+		add(passwordLabel);
+		passwordInput = new JPasswordField();
+		passwordInput.setBounds(50, 90, 200, 20);
+		add(passwordInput);
+
+		// Create name input
+		nameLabel = new JLabel("Name:");
+		nameLabel.setBounds(50, 120, 200, 20);
+		add(nameLabel);
+		nameInput = new JTextField();
+		nameInput.setBounds(50, 140, 200, 20);
+		add(nameInput);
+
+		// Create address input
+		addressLabel = new JLabel("Address:");
+		addressLabel.setBounds(50, 170, 200, 20);
+		add(addressLabel);
+		addressInput = new JTextField();
+		addressInput.setBounds(50, 190, 200, 20);
+		add(addressInput);
+
+		// Create phone input
+		phoneLabel = new JLabel("Phone Number:");
+		phoneLabel.setBounds(50, 220, 200, 20);
+		add(phoneLabel);
+		phoneInput = new JTextField();
+		phoneInput.setBounds(50, 240, 200, 20);
+		add(phoneInput);
+
+		// Create chequing input
+		chequingLabel = new JLabel("Chequing Account Balance:");
+		chequingLabel.setBounds(50, 270, 200, 20);
+		add(chequingLabel);
+		chequingInput = new JTextField();
+		chequingInput.setBounds(50, 290, 200, 20);
+		add(chequingInput);
+
+		// Create savings input
+		savingsLabel = new JLabel("Savings Account Balance:");
+		savingsLabel.setBounds(50, 320, 200, 20);
+		add(savingsLabel);
+		savingsInput = new JTextField();
+		savingsInput.setBounds(50, 340, 200, 20);
+		add(savingsInput);
+
+		// Create investment input
+		investemntLabel = new JLabel("Investment Account Balance:");
+		investemntLabel.setBounds(50, 370, 200, 20);
+		add(investemntLabel);
+		investmentInput = new JTextField();
+		investmentInput.setBounds(50, 390, 200, 20);
+		add(investmentInput);
+
+		// Create buttons
+		buttonPanel = new JPanel();
+		buttonPanel.setBounds(50, 415, 200, 80);
+		backButton = new JButton("Back");
+		backButton.addActionListener(this);
+		buttonPanel.add(backButton);
+		confirmButton = new JButton("Sign Up");
+		confirmButton.addActionListener(this);
+		buttonPanel.add(confirmButton);
+		add(buttonPanel);
+	}
+
+	/**
+	 * Method to check if id is available
+	 */
+	public boolean idAvailable(String id) throws IOException {
+		// Get number of logins
+		BufferedReader logins = new BufferedReader(new FileReader("CUSTOMERLOGINS"));
+		int n = 0;
+		while(logins.readLine() != null) n++;
+		logins.close();
+
+		// Get login information
+		logins = new BufferedReader(new FileReader("CUSTOMERLOGINS"));
+		for(int i = 0; i < n; i++) {
+			String[] info = logins.readLine().split("/");
+			// Compare id
+			if(id.equals(info[0])) {
+				logins.close();
+
+				// id is taken
+				return false;
+			}
+		}
+
+		// id is available
+		return true;
+	}
+
+	/**
+	 * Method to listen to buttons
+	 */
+	public void actionPerformed(ActionEvent event) {
+		try {
+			// Try sign up
+			if(event.getSource() == confirmButton) {
+				String id = idInput.getText();
+				// Check if id is available
+				if(idAvailable(id)) {
+					// Convert password to string
+					String password = "";
+					char[] passwordChars = passwordInput.getPassword();
+					for(int i = 0; i < passwordChars.length; i++) {
+						password += passwordChars[i];
+					}
+
+					// Get information
+					String name = nameInput.getText();
+					String address = addressInput.getText();
+					String phone = phoneInput.getText();
+					double chequingBalance = Double.parseDouble(chequingInput.getText());
+					double savingsBalance = Double.parseDouble(savingsInput.getText());
+					double investmentBalance = Double.parseDouble(investmentInput.getText());
+
+					// Create accounts
+					Customer customer = new Customer(name, address, phone);
+					ChequingAccount chequing = new ChequingAccount(customer, chequingBalance);
+					SavingsAccount savings = new SavingsAccount(customer, savingsBalance);
+					InvestmentAccount investment = new InvestmentAccount(customer, investmentBalance);
+
+					// Create customer file
+					String fileName = name + "-" + chequing.getAccountNumber() + "-" + savings.getAccountNumber() + "-" + investment.getAccountNumber();
+					PrintWriter customerFile = new PrintWriter(new FileWriter(fileName));
+					customerFile.println(address);
+					customerFile.println(phone);
+					customerFile.println(chequing.getBalance());
+					customerFile.println(savings.getBalance());
+					customerFile.print(investment.getBalance());
+					customerFile.close();
+
+					// Add information to logins file
+					BufferedWriter logins = new BufferedWriter(new FileWriter("CUSTOMERLOGINS", true));
+					logins.newLine();
+					logins.append(id + "/" + password + "/" + fileName);
+					logins.close();
+
+					setVisible(false);
+					Main.openCustomerUI(fileName);
+				}
+				else JOptionPane.showMessageDialog(null, "ID " + id + " is taken");
+			}
+			// Return to start up window
+			else {
+				setVisible(false);
+				Main.back();
+			}
+		}
+		catch(IOException error) {
+			JOptionPane.showMessageDialog(null, "Error loading login information");
+		}
+	}
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+
+	}
+
+}

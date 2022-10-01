@@ -1,0 +1,125 @@
+/**
+ * 
+ */
+
+/**
+ * @author simranbaria
+ * Date: May 2022
+ * Desc: Chequing Account
+ * 	 Inherits from Account
+ * 	 Default deduction fee of 0.5% of balance per withdrawal
+ * 	 Default service fee of $3.50 per deposit
+ * Method List: public double getDeductionFee() - Returns deduction fee
+ * 		public void setDeductionFee(double deductionFee) - Sets deduction fee
+ * 		public double getServiceFee() - Returns service fee
+ * 		public void setServiceFee(double serviceFee) - Sets service fee
+ * 		public ChequingAccount(Customer info, double initialBalance) - Constructor
+ * 		public boolean withdraw(double funds) - Withdraws funds and applies deduction fee
+ * 		public boolean deposit(double funds) - Deposits funds and applies service fee
+ * 		public static void main(String[] args) - Main method
+ *
+ */
+public class ChequingAccount extends Account {
+
+	/**
+	 * Private data
+	 */
+	private double deductionFee, serviceFee;
+
+	/**
+	 * @return the deductionFee
+	 */
+	public double getDeductionFee() {
+		return deductionFee;
+	}
+
+	/**
+	 * @param deductionFee the deductionFee to set
+	 */
+	public void setDeductionFee(double deductionFee) {
+		this.deductionFee = deductionFee;
+	}
+
+	/**
+	 * @return the serviceFee
+	 */
+	public double getServiceFee() {
+		return serviceFee;
+	}
+
+	/**
+	 * @param serviceFee the serviceFee to set
+	 */
+	public void setServiceFee(double serviceFee) {
+		this.serviceFee = serviceFee;
+	}
+
+	/**
+	 * Constructor
+	 */
+	public ChequingAccount(Customer info, double initialBalance) {
+		super(info);
+		super.deposit(initialBalance);
+		deductionFee = 0.5;
+		serviceFee = 3.5;
+	}
+
+	/**
+	 * Method to withdraw funds
+	 * Deducts a fee from the balance
+	 */
+	public boolean withdraw(double funds) {
+		// Deduction fee
+		if(super.withdraw(getBalance() * (deductionFee / 100))) {
+			return super.withdraw(funds);
+		}
+		// Insufficient funds
+		return false;
+	}
+
+	/**
+	 * Method to deposit funds
+	 * Has a service fee
+	 */
+	public boolean deposit(double funds) {
+		if(super.deposit(funds)) {
+			// Service fee
+			return super.withdraw(serviceFee);
+		}
+		return false;
+	}
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// Test constructor
+		Customer customer = new Customer("Jane", "111 Street", "999-999-9999");
+		ChequingAccount account = new ChequingAccount(customer, 0);
+		
+		// Test setters and getters
+		account.setDeductionFee(0.25);
+		account.setServiceFee(3);
+		System.out.println(account.getInfo().getName());
+		System.out.println(account.getInfo().getAddress());
+		System.out.println(account.getInfo().getPhone());
+		System.out.println(account.getBalance());
+		System.out.println(account.getAccountNumber());
+		System.out.println(account.getDeductionFee());
+		System.out.println(account.getServiceFee());
+		
+		// Test deposit method
+		if(account.deposit(900)) System.out.println(account.formatBalance(account.getBalance()));
+		else System.out.println("Cannot deposit negative funds");
+		if(account.deposit(-1)) System.out.println(account.formatBalance(account.getBalance()));
+		else System.out.println("Cannot deposit negative funds");
+		
+		// Test withdraw method
+		if(account.withdraw(60)) System.out.println(account.formatBalance(account.getBalance()));
+		else System.out.println("Insufficient funds");
+		if(account.withdraw(1000)) System.out.println(account.formatBalance(account.getBalance()));
+		else System.out.println("Insufficient funds");
+
+	}
+
+}
