@@ -1,0 +1,201 @@
+/**
+ * 
+ */
+
+/**
+ * @author Jayprakash Pathak
+ * Date: May. 2022
+ * Desc: Investment account
+ * 		 Inherits from account
+ * 		 Default minimum investment of $2500.00
+ * 		 Default charge of 0.025% per investment
+ * 		 Default interest rate of 2% for investment withdrawn after 30 days or more
+ * 		 Default penalty of 1% if investment is withdrawn before 30 days
+ * Method List: public double getMinimumInvestment() - Returns minimum investment
+ * 				public void setMinimumInvestment(double minimumInvestment) - Sets minimum investment
+ * 				public double getCharge() - Returns up-front charge
+ * 				public void setCharge(double charge) - Sets up-front charge
+ * 				public double getInterest() - Returns interest rate
+ * 				public void setInterest(double interest) - Sets interest rate
+ * 				public double getPenalty() - Returns penalty
+ * 				public void setPenalty(double penalty) - Sets penalty
+ * 				public int getDays() - Returns days
+ * 				public void setDays(int days) - Sets days
+ * 				public InvestmentAccount(Customer info, double initialBalance) - Constructor
+ * 				public boolean deposit(double funds) - Deposits funds and applies charge
+ * 				public boolean withdraw(double funds, int daysSinceInvestment) - Withdraws funds and applies interest or penalty based on days
+ * 				public static void main(String[] args) - Main method
+ *
+ */
+public class InvestmentAccount extends Account {
+
+	/**
+	 * Private data
+	 */
+	private double minimumInvestment, charge, interest, penalty;
+	private int days;
+
+	/**
+	 * @return the minimumInvestment
+	 */
+	public double getMinimumInvestment() {
+		return minimumInvestment;
+	}
+
+	/**
+	 * @param minimumInvestment the minimumInvestment to set
+	 */
+	public void setMinimumInvestment(double minimumInvestment) {
+		this.minimumInvestment = minimumInvestment;
+	}
+
+	/**
+	 * @return the charge
+	 */
+	public double getCharge() {
+		return charge;
+	}
+
+	/**
+	 * @param charge the charge to set
+	 */
+	public void setCharge(double charge) {
+		this.charge = charge;
+	}
+
+	/**
+	 * @return the interest
+	 */
+	public double getInterest() {
+		return interest;
+	}
+
+	/**
+	 * @param interest the interest to set
+	 */
+	public void setInterest(double interest) {
+		this.interest = interest;
+	}
+
+	/**
+	 * @return the penalty
+	 */
+	public double getPenalty() {
+		return penalty;
+	}
+
+	/**
+	 * @param penalty the penalty to set
+	 */
+	public void setPenalty(double penalty) {
+		this.penalty = penalty;
+	}
+
+	/**
+	 * @return the days
+	 */
+	public int getDays() {
+		return days;
+	}
+
+	/**
+	 * @param days the days to set
+	 */
+	public void setDays(int days) {
+		this.days = days;
+	}
+
+	/**
+	 * Constructor
+	 */
+	public InvestmentAccount(Customer info, double initialBalance) {
+		super(info);
+		super.deposit(initialBalance);
+		minimumInvestment = 2500;
+		charge = 0.025;
+		interest = 2;
+		penalty = 1;
+		days = 30;
+	}
+
+	/**
+	 * Method to deposit funds
+	 * Has a charge
+	 */
+	public boolean deposit(double funds) {
+		// Check if deposit is possible
+		if(funds >= minimumInvestment) {
+			if(super.deposit(funds)) {
+				// Charge
+				super.withdraw(getBalance() * (charge / 100));
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Method to withdraw funds
+	 * Has an interest rate and penalty
+	 */
+	public boolean withdraw(double funds, int daysSinceInvestment) {
+		// Check how many days since investment
+		if(daysSinceInvestment >= days) {
+			// Interest
+			super.deposit(getBalance() * (interest / 100));
+			return super.withdraw(funds);
+		}
+		else {
+			// Penalty
+			super.withdraw(getBalance() * (penalty / 100));
+			return super.withdraw(funds);
+		}
+	}
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// Test constructor
+		Customer customer = new Customer("Jane", "111 Street", "999-999-9999");
+		InvestmentAccount account = new InvestmentAccount(customer, 0);
+
+		// Test getters and setters
+		account.setMinimumInvestment(2000);
+		account.setCharge(0.05);
+		account.setInterest(5);
+		account.setPenalty(2);
+		account.setDays(40);
+		System.out.println(account.getInfo().getName());
+		System.out.println(account.getInfo().getAddress());
+		System.out.println(account.getInfo().getPhone());
+		System.out.println(account.getBalance());
+		System.out.println(account.getAccountNumber());
+		System.out.println(account.getMinimumInvestment());
+		System.out.println(account.getCharge());
+		System.out.println(account.getInterest());
+		System.out.println(account.getPenalty());
+		System.out.println(account.getDays());
+
+		// Test deposit method
+		if(account.deposit(2000)) System.out.println(account.formatBalance(account.getBalance()));
+		else System.out.println("Cannot deposit funds less than $" +
+				account.formatBalance(account.getMinimumInvestment()));
+		if(account.deposit(1000)) System.out.println(account.formatBalance(account.getBalance()));
+		else System.out.println("Cannot deposit funds less than $" +
+				account.formatBalance(account.getMinimumInvestment()));
+		if(account.deposit(-1)) System.out.println(account.formatBalance(account.getBalance()));
+		else System.out.println("Cannot deposit funds less than $" +
+				account.formatBalance(account.getMinimumInvestment()));
+		
+		// Test withdraw method
+		if(account.withdraw(500, 40)) System.out.println(account.formatBalance(account.getBalance()));
+		else System.out.println("Insufficient funds");
+		if(account.withdraw(500, 20)) System.out.println(account.formatBalance(account.getBalance()));
+		else System.out.println("Insufficient funds");
+		if(account.withdraw(10000, 40)) System.out.println(account.formatBalance(account.getBalance()));
+		else System.out.println("Insufficient funds");
+
+	}
+
+}
