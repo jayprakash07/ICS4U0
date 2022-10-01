@@ -21,3 +21,5 @@ Ensure all listed files are included:
         Logo_V1_Small.png
 
 Run Main.java to launch the application
+
+Created by: Jayprakash Pathak
